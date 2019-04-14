@@ -1,9 +1,11 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.repository
 
 import android.app.Application
-import android.provider.Contacts
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.kth.kotlinblemodule.repository.AppDatabase
+import com.kth.kotlinblemodule.repository.BleDao
+import com.kth.kotlinblemodule.repository.BleModel
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 

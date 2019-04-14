@@ -1,7 +1,6 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.room.*
 
 @Dao

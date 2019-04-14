@@ -1,4 +1,4 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.app
 
 import android.app.Application
 import android.bluetooth.BluetoothDevice

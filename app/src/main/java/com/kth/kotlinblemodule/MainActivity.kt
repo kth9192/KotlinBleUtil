@@ -11,6 +11,7 @@ import android.widget.Toast
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.content.BroadcastReceiver
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import androidx.lifecycle.Observer
@@ -18,7 +19,16 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import android.content.DialogInterface
 import androidx.appcompat.app.AlertDialog
+import com.kth.kotlinblemodule.background.BleService
+import com.kth.kotlinblemodule.repository.BleModel
+import com.kth.kotlinblemodule.util.BleUtil
+import com.kth.kotlinblemodule.view.BleAdapter
+import com.kth.kotlinblemodule.viewmodel.BleViewModel
 import kotlin.collections.ArrayList
+import android.content.ComponentName
+import android.os.IBinder
+import android.content.ServiceConnection
+import com.kth.kotlinblemodule.util.Const
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,11 +39,11 @@ class MainActivity : AppCompatActivity() {
     private var PERMISSION_ALL = 1
     private lateinit var viewModel: BleViewModel
     private lateinit var gatt: BluetoothGatt
+    private val bluetoothAdapter = BleUtil.bluetoothAdapter
 
-    private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
-        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothManager.adapter
-    }
+    private var bleService: BleService? = null
+
+    private lateinit var bleModel: BleModel
 
     private val BluetoothAdapter.isDisabled: Boolean
         get() = !isEnabled
@@ -57,13 +67,14 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
-        ble_scanner = bluetoothAdapter?.bluetoothLeScanner
-
         bluetoothAdapter?.takeIf { it.isDisabled }?.apply {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
         }
 
+        ble_scanner = bluetoothAdapter?.bluetoothLeScanner
+
+        //뷰설정
         val adapter = BleAdapter()
         adapter.setHasStableIds(true)
         recycler.layoutManager = LinearLayoutManager(this)
@@ -77,14 +88,17 @@ class MainActivity : AppCompatActivity() {
             BleUtil.scanLeDevice(it.isEnabled, ble_scanner, leScanCallback)
         }
 
-        read.setOnClickListener {
-//            BleUtil.read()
+        connect.setOnClickListener {
+            bleService?.connect(bleModel.macAddr)
         }
+
+        bindService(Intent(this, BleService::class.java), bleConnection, Context.BIND_AUTO_CREATE)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         viewModel.deleteAll()
+        unbindService(bleConnection)
     }
 
     private val leScanCallback = object : ScanCallback() {
@@ -92,8 +106,8 @@ class MainActivity : AppCompatActivity() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             super.onScanResult(callbackType, result)
             Log.d("DeviceScan", "onScanResult: ${result?.device?.address} - ${result?.device?.name}")
-            var bleModel = BleModel(result?.device?.address.toString(), result?.device).also { viewModel.insert(it) }
-            Log.d(TAG,"테스트 " + bleModel.device?.address)
+            bleModel = BleModel(result?.device?.address.toString(), result?.device )
+                .also { viewModel.insert(it) }
         }
 
         override fun onBatchScanResults(results: MutableList<ScanResult>?) {
@@ -116,56 +130,38 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val gattCallback = object : BluetoothGattCallback() {
+    private val gattUpdateReceiver = object : BroadcastReceiver() {
 
-        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
-            super.onServicesDiscovered(gatt, status)
+        private lateinit var bluetoothLeService: BleService
 
-            if (status == BluetoothProfile.STATE_CONNECTED) {
-                for (service in gatt?.services!!) {
-                    Log.d(TAG, service.uuid.toString())
-                    for (characteristic in service.characteristics) {
-                        Log.d(TAG, characteristic.uuid.toString())
-                    }
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            when (action) {
+                Const.ACTION_GATT_CONNECTED -> {
+
+                }
+                Const.ACTION_GATT_DISCONNECTED -> {
+
+                }
+                Const.ACTION_GATT_SERVICES_DISCOVERED -> {
+
+                }
+                Const.ACTION_DATA_AVAILABLE -> {
+
                 }
             }
         }
+    }
 
-        override fun onReadRemoteRssi(gatt: BluetoothGatt?, rssi: Int, status: Int) {
-            super.onReadRemoteRssi(gatt, rssi, status)
-            if (status == BluetoothProfile.STATE_CONNECTED) {
+    private val bleConnection = object : ServiceConnection {
 
-            } else if (status == BluetoothProfile.STATE_DISCONNECTED){
+        override fun onServiceConnected(componentName: ComponentName, service: IBinder) {
+            bleService = (service as BleService.MyBinder).service
 
-            }
         }
 
-        override fun onCharacteristicRead(
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?,
-            status: Int
-        ) {
-            super.onCharacteristicRead(gatt, characteristic, status)
-        }
-
-        override fun onCharacteristicWrite(
-            gatt: BluetoothGatt?,
-            characteristic: BluetoothGattCharacteristic?,
-            status: Int
-        ) {
-            super.onCharacteristicWrite(gatt, characteristic, status)
-        }
-
-        override fun onCharacteristicChanged(gatt: BluetoothGatt?, characteristic: BluetoothGattCharacteristic?) {
-            super.onCharacteristicChanged(gatt, characteristic)
-        }
-
-        override fun onDescriptorRead(gatt: BluetoothGatt?, descriptor: BluetoothGattDescriptor?, status: Int) {
-            super.onDescriptorRead(gatt, descriptor, status)
-        }
-
-        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
-            super.onConnectionStateChange(gatt, status, newState)
+        override fun onServiceDisconnected(componentName: ComponentName) {
+            bleService = null
         }
     }
 

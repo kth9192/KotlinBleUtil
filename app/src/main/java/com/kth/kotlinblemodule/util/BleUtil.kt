@@ -1,16 +1,15 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.util
 
 import android.app.Activity
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.*
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Handler
 import androidx.core.app.ActivityCompat
-import kotlinx.android.synthetic.main.activity_main.*
+import androidx.core.content.ContextCompat.getSystemService
+import com.kth.kotlinblemodule.app.MyApp
 import java.util.*
 
 object BleUtil {
@@ -18,6 +17,11 @@ object BleUtil {
     private var PERMISSION_ALL: Int = 1
     private lateinit var gatt: BluetoothGatt
     private var SCAN_PERIOD: Long = 10000
+
+    val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
+        val bluetoothManager = MyApp.getGlobalApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothManager.adapter
+    }
 
     fun setScanPeriod(time: Long) {
         SCAN_PERIOD = time
@@ -28,7 +32,9 @@ object BleUtil {
         if (context != null) {
             for (permission in permissions) {
                 if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(context as Activity, permissions, PERMISSION_ALL)
+                    ActivityCompat.requestPermissions(context as Activity, permissions,
+                        PERMISSION_ALL
+                    )
                 }
             }
         }

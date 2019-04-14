@@ -1,9 +1,10 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.repository
 
 import android.bluetooth.BluetoothDevice
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.kth.kotlinblemodule.repository.BleModel
 
 
 class DeviceTypeConverter {

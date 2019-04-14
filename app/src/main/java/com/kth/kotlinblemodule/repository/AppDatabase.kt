@@ -1,4 +1,4 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.repository
 
 import android.content.Context
 import androidx.room.*
@@ -6,7 +6,7 @@ import androidx.room.*
 @Database(entities = arrayOf(BleModel::class), version = 1, exportSchema = false)
 @TypeConverters(DeviceTypeConverter::class)
 abstract class AppDatabase : RoomDatabase(){
-    abstract fun bleDao() :BleDao
+    abstract fun bleDao() : BleDao
 
     companion object {
 

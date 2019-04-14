@@ -1,4 +1,4 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.view
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,6 +7,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.kth.kotlinblemodule.repository.BleModel
+import com.kth.kotlinblemodule.R
+import com.kth.kotlinblemodule.app.MyApp
 import com.kth.kotlinblemodule.databinding.ItemBleBinding
 
 class BleAdapter :

@@ -1,4 +1,4 @@
-package com.kth.kotlinblemodule
+package com.kth.kotlinblemodule.repository
 
 import android.bluetooth.BluetoothDevice
 import androidx.room.Entity
