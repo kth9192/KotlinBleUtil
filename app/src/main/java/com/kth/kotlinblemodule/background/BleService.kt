@@ -10,8 +10,15 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.os.Binder
 import com.kth.kotlinblemodule.util.BleUtil
 import com.kth.kotlinblemodule.util.Const
+import com.kth.kotlinblemodule.util.Const.ACTION_GATT_CONNECTED
+import com.kth.kotlinblemodule.util.Const.ACTION_GATT_DISCONNECTED
+import com.kth.kotlinblemodule.util.Const.STATE_CONNECTED
+import com.kth.kotlinblemodule.util.Const.STATE_DISCONNECTED
 
 
+/** gattcallback 으로 변화하는 값을 백그라운드에서 서비스로 돌리면서
+ * 브로드 캐스트로 전달
+ * */
 class BleService : Service() {
 
     private val TAG = BleService::class.java.simpleName
@@ -28,6 +35,13 @@ class BleService : Service() {
 
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             super.onConnectionStateChange(gatt, status, newState)
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                mConnectionState = STATE_CONNECTED
+                broadcastUpdate(ACTION_GATT_CONNECTED)
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                mConnectionState = STATE_DISCONNECTED
+                broadcastUpdate(ACTION_GATT_DISCONNECTED)
+            }
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
@@ -58,6 +72,9 @@ class BleService : Service() {
             status: Int
         ) {
             super.onCharacteristicRead(gatt, characteristic, status)
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+
+            }
         }
 
         override fun onCharacteristicWrite(
