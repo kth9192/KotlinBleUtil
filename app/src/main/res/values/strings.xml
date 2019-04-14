@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">KotlinBleModule</string>
+	<string name="title_scan_error">스캔 실패</string>
+	<string name="error_search_device">장비 찾기에 실패했습니다. 다시 시도해주세요.</string>
+</resources>
